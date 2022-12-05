@@ -144,6 +144,17 @@ describe("POST /booking", () => {
       expect(response.status).toEqual(httpStatus.BAD_REQUEST);
     });
 
+    it("should respond with status 400 when roomId is invalid", async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+
+      const roomId = 0;
+
+      const response = await server.post("/booking").set("Authorization", `Bearer ${token}`).send({ roomId });
+
+      expect(response.status).toEqual(httpStatus.BAD_REQUEST);
+    });
+
     it("should respond with status 403 when user doesnt have an enrollment yet", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
@@ -214,23 +225,6 @@ describe("POST /booking", () => {
       const response = await server.post("/booking").set("Authorization", `Bearer ${token}`).send({ roomId });
 
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
-    });
-
-    it("should respond with status 403 when roomId is invalid", async () => {
-      const user = await createUser();
-      const token = await generateValidToken(user);
-      const enrollment = await createEnrollmentWithAddress(user);
-
-      const ticketType = await createTicketTypeWithHotel();
-      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
-      await createPayment(ticket.id, ticketType.price);
-
-      await createHotel();
-      const roomId = 0;
-
-      const response = await server.post("/booking").set("Authorization", `Bearer ${token}`).send({ roomId });
-
-      expect(response.status).toEqual(httpStatus.BAD_REQUEST);
     });
 
     it("should respond with status 403 when user has a previous booking", async () => {
@@ -352,26 +346,12 @@ describe("PUT /booking/:bookingId", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
- 
+
     it("should respond with status 400 when bookingId is invalid", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
 
       const invalidParam = 0;
-
-      const response = await server
-        .put(`/booking/${invalidParam}`)
-        .set("Authorization", `Bearer ${token}`)
-        .send({ roomId: 1 });
-
-      expect(response.status).toBe(httpStatus.BAD_REQUEST);
-    });
- 
-    it("should respond with status 400 when bookingId is not a number", async () => {
-      const user = await createUser();
-      const token = await generateValidToken(user);
-
-      const invalidParam = faker.lorem.word();
 
       const response = await server
         .put(`/booking/${invalidParam}`)
@@ -389,7 +369,7 @@ describe("PUT /booking/:bookingId", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
-   
+
     it("should respond with status 400 when roomId is not a number", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
@@ -403,7 +383,7 @@ describe("PUT /booking/:bookingId", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
-    
+
     it("should respond with status 400 when roomId is invalid", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
@@ -417,7 +397,7 @@ describe("PUT /booking/:bookingId", () => {
 
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
-  
+
     it("should respond with status 404 when booking doesnt exist", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
@@ -426,7 +406,7 @@ describe("PUT /booking/:bookingId", () => {
 
       expect(response.status).toBe(httpStatus.NOT_FOUND);
     });
-   
+
     it("should respond with status 403 when user doesnt have a reservation", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
@@ -494,7 +474,7 @@ describe("PUT /booking/:bookingId", () => {
 
       expect(response.status).toBe(httpStatus.FORBIDDEN);
     });
-    
+
     it("should respond with status 200 and with bookingId when everything is ok", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
@@ -521,7 +501,7 @@ describe("PUT /booking/:bookingId", () => {
         bookingId: expect.any(Number),
       });
     });
-  
+
     it("should update booking when everything is ok", async () => {
       const user = await createUser();
       const token = await generateValidToken(user);
